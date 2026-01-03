@@ -1,4 +1,6 @@
 #include<stdio.h>
+#include<math.h>
+
 #include "raylib.h"
 
 #define FPS 120
@@ -9,19 +11,28 @@
 
 #define FLOOR_Y (HEIGHT*0.6)
 
-#define NUM_SPRING_ELEMENT 10
-#define SPRING_ELEM_LENGTH 300
+#define NUM_SPRING_ELEMENT 16
+#define SPRING_ELEM_LENGTH 60
 float x_mass;
 
 void drawSpring(){
     float x_springdelta  = x_mass / NUM_SPRING_ELEMENT;
-    for(int i=0; i<NUM_SPRING_ELEMENT; i++){
-        Vector2 start = {x_springdelta * i , FLOOR_Y - MASS_WIDTH/2};
-
-
+    for(int i=0; i<NUM_SPRING_ELEMENT; i+=2){
         float y_end = sqrt(pow(SPRING_ELEM_LENGTH, 2) - pow(x_springdelta , 2));
-        Vector2 end = {start.x + x_springdelta ,y_end};
-        DrawLineEx(start, end, THICKNESS, BLUE);
+        Vector2 start = {x_springdelta * i , FLOOR_Y - MASS_WIDTH/2+SPRING_ELEM_LENGTH/2};
+        Vector2 end = {start.x + x_springdelta ,start.y-y_end};
+        DrawLineEx(start, end, THICKNESS/2, GRAY);
+
+        
+    }
+
+    for(int i=1; i<NUM_SPRING_ELEMENT; i+=2){
+        float y_end = sqrt(pow(SPRING_ELEM_LENGTH, 2) - pow(x_springdelta , 2));
+        Vector2 start = {x_springdelta * i , FLOOR_Y - MASS_WIDTH/2-SPRING_ELEM_LENGTH/2};
+        Vector2 end = {start.x + x_springdelta ,start.y+y_end};
+        DrawLineEx(start, end, THICKNESS/2, LIGHTGRAY);
+
+        
     }
 }
 
@@ -41,7 +52,7 @@ int main(void)
     InitWindow(WIDTH, HEIGHT, "Spring on Mass Simulator");
 
     float x = 0;
-    float v= 20;
+    float v= 40;
     float dt;
     SetTargetFPS(FPS);
     while (!WindowShouldClose())
