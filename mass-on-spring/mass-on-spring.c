@@ -8,19 +8,35 @@
 #define HEIGHT 600
 #define THICKNESS 5
 #define MASS_WIDTH 100
-
+#define K 5
+#define FRICTION 0.5
 #define FLOOR_Y (HEIGHT*0.6)
+
+#define X_REST (WIDTH/3)
 
 #define NUM_SPRING_ELEMENT 16
 #define SPRING_ELEM_LENGTH 60
-float x_mass;
+
+
+float x_mass = WIDTH*0.8;
+float v= 300;
+float a = 2;
+
+typedef struct {
+    Vector2 start,end;
+
+} SpringElement;
+
+SpringElement spring_elements[NUM_SPRING_ELEMENT];
+
 
 void drawSpring(){
     float x_springdelta  = x_mass / NUM_SPRING_ELEMENT;
+    float y_end = sqrt(pow(SPRING_ELEM_LENGTH, 2) - pow(x_springdelta , 2));
     for(int i=0; i<NUM_SPRING_ELEMENT; i+=2){
-        float y_end = sqrt(pow(SPRING_ELEM_LENGTH, 2) - pow(x_springdelta , 2));
         Vector2 start = {x_springdelta * i , FLOOR_Y - MASS_WIDTH/2+SPRING_ELEM_LENGTH/2};
         Vector2 end = {start.x + x_springdelta ,start.y-y_end};
+        spring_elements[i] = (SpringElement){start, end};
         DrawLineEx(start, end, THICKNESS/2, GRAY);
 
         
@@ -28,7 +44,7 @@ void drawSpring(){
 
     for(int i=1; i<NUM_SPRING_ELEMENT; i+=2){
         float y_end = sqrt(pow(SPRING_ELEM_LENGTH, 2) - pow(x_springdelta , 2));
-        Vector2 start = {x_springdelta * i , FLOOR_Y - MASS_WIDTH/2-SPRING_ELEM_LENGTH/2};
+        Vector2 start = spring_elements[i-1].end;
         Vector2 end = {start.x + x_springdelta ,start.y+y_end};
         DrawLineEx(start, end, THICKNESS/2, LIGHTGRAY);
 
@@ -49,10 +65,10 @@ void drawMass(){
 
 int main(void)
 {
-    InitWindow(WIDTH, HEIGHT, "Spring on Mass Simulator");
+    InitWindow(WIDTH, HEIGHT, "Mass on Spring Simulation");
 
-    float x = 0;
-    float v= 40;
+
+
     float dt;
     SetTargetFPS(FPS);
     while (!WindowShouldClose())
@@ -62,10 +78,13 @@ int main(void)
             DrawFPS(10, 10);
             dt = GetFrameTime();
             drawFloor();
+            float friction = a>0 ? FRICTION : -FRICTION;
+            a =  - K * (x_mass - X_REST) - v * FRICTION;
+            v += a * dt;
             x_mass += v * dt;
             drawMass();
             drawSpring();
-            DrawText("Spring on mass go brrrrr", WIDTH/10, 100, 30, GREEN);
+            DrawText("Mass on Spring Simulation", WIDTH/10, 100, 30, GREEN);
         EndDrawing();
     }
 
